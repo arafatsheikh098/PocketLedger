@@ -1,0 +1,38 @@
+{% extends "base.html.j2" %}
+{% block title %}Categories - PocketLedger{% endblock %}
+{% block content %}
+<h1>Categories</h1>
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+<table>
+  <thead><tr><th>Name</th><th>Default</th><th>Used in</th><th></th></tr></thead>
+  <tbody>
+  {% for c in categories %}
+    <tr>
+      <td>
+        <form method="post" action="/categories/{{ c.id }}/rename" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input name="name" value="{{ c.name }}" maxlength="64" required>
+          <button type="submit" class="secondary">Rename</button>
+        </form>
+      </td>
+      <td>{{ "yes" if c.is_default else "no" }}</td>
+      <td>{{ usage.get(c.id, 0) }} transactions</td>
+      <td>
+        {% if not c.is_default %}
+        <form method="post" action="/categories/{{ c.id }}/delete" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="secondary" onclick="return confirm('Delete category {{ c.name }}?')">Delete</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<h2>Add category</h2>
+<form method="post" action="/categories">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <div class="row"><label>Name <input name="name" maxlength="64" required></label></div>
+  <button type="submit">Create</button>
+</form>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html.j2" %}
+{% block title %}Transactions - PocketLedger{% endblock %}
+{% block content %}
+<h1>Transactions</h1>
+<p class="muted">Income this period: <span class="amount-income">{{ "%.2f"|format(totals.income / 100) }}</span> &middot; Expense: <span class="amount-expense">{{ "%.2f"|format(totals.expense / 100) }}</span> &middot; Net: {{ "%.2f"|format(totals.net / 100) }} (transfers excluded)</p>
+
+<form method="get" action="/transactions" class="filters">
+  <div class="row"><label>From <input type="date" name="date_from" value="{{ filters.date_from or '' }}"></label></div>
+  <div class="row"><label>To <input type="date" name="date_to" value="{{ filters.date_to or '' }}"></label></div>
+  <div class="row"><label>Account
+    <select name="account_id">
+      <option value="">All</option>
+      {% for a in accounts %}<option value="{{ a.id }}" {% if filters.account_id == a.id %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+    </select>
+  </label></div>
+  <div class="row"><label>Category
+    <select name="category_id">
+      <option value="">All</option>
+      {% for c in categories %}<option value="{{ c.id }}" {% if filters.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+  </label></div>
+  <div class="row"><label>Text <input name="text" value="{{ filters.text }}"></label></div>
+  <div class="row"><label><input type="checkbox" name="only_uncategorized" value="true" {% if filters.only_uncategorized %}checked{% endif %}> Uncategorized only</label></div>
+  <div class="row"><label>Sort
+    <select name="sort">
+      <option value="date_desc" {% if filters.sort == 'date_desc' %}selected{% endif %}>Date (newest first)</option>
+      <option value="date_asc" {% if filters.sort == 'date_asc' %}selected{% endif %}>Date (oldest first)</option>
+      <option value="amount_desc" {% if filters.sort == 'amount_desc' %}selected{% endif %}>Amount (largest first)</option>
+      <option value="amount_asc" {% if filters.sort == 'amount_asc' %}selected{% endif %}>Amount (smallest first)</option>
+      <option value="description_asc" {% if filters.sort == 'description_asc' %}selected{% endif %}>Description (A-Z)</option>
+    </select>
+  </label></div>
+  <button type="submit">Apply</button>
+  <a class="btn secondary" href="/transactions">Reset</a>
+  <a class="btn" href="/transactions/new">New transaction</a>
+</form>
+
+<table>
+  <thead><tr><th>Date</th><th>Description</th><th>Account</th><th>Category</th><th>Amount</th><th></th></tr></thead>
+  <tbody>
+  {% for t in rows %}
+    <tr>
+      <td>{{ t.date }}</td>
+      <td>{{ t.description }}{% if t.is_transfer %} <span class="muted">(transfer)</span>{% endif %}</td>
+      <td>{{ (accounts | selectattr('id', 'equalto', t.account_id) | first).name if accounts | selectattr('id', 'equalto', t.account_id) else '?' }}</td>
+      <td>
+        {% if t.category_id %}{{(categories | selectattr('id', 'equalto', t.category_id) | first).name if categories | selectattr('id', 'equalto', t.category_id) else '?'}}{% else %}<span class="muted">uncategorized</span>{% endif %}
+      </td>
+      <td class="{% if t.amount_minor < 0 %}amount-expense{% elif t.amount_minor > 0 %}amount-income{% endif %}">{{ "%.2f"|format(t.amount_minor / 100) }}</td>
+      <td>
+        <a class="btn secondary" href="/transactions/{{ t.id }}/edit">Edit</a>
+        <form method="post" action="/transactions/{{ t.id }}/delete" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="secondary" onclick="return confirm('Delete this transaction?')">Delete</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="muted">No transactions match these filters.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="muted">Page {{ page }} of {{ pages }} &middot; {{ total }} total</p>
+{% if pages > 1 %}
+<p>
+  {% for p in range(1, pages + 1) %}
+    <a class="btn secondary" href="/transactions?page={{ p }}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.account_id %}&account_id={{ filters.account_id }}{% endif %}{% if filters.category_id %}&category_id={{ filters.category_id }}{% endif %}{% if filters.text %}&text={{ filters.text }}{% endif %}{% if filters.only_uncategorized %}&only_uncategorized=true{% endif %}{% if filters.sort %}&sort={{ filters.sort }}{% endif %}">{{ p }}</a>
+  {% endfor %}
+</p>
+{% endif %}
+{% endblock %}

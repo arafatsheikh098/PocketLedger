@@ -1,0 +1,33 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ "Edit" if txn else "New" }} transaction - PocketLedger{% endblock %}
+{% block content %}
+<h1>{{ "Edit" if txn else "New" }} transaction</h1>
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+<form method="post" action="{{ '/transactions/' ~ txn.id ~ '/edit' if txn else '/transactions' }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <div class="row"><label>Date <input type="date" name="date" value="{{ txn.date if txn else '' }}" required></label></div>
+  <div class="row"><label>Amount (positive number) <input name="amount" value="{{ '' if not txn else (txn.amount_minor | abs / 100) }}" step="0.01" required></label></div>
+  <div class="row"><label>Kind
+    <select name="kind">
+      <option value="expense" {% if txn and txn.amount_minor < 0 and not txn.is_transfer %}selected{% endif %}>Expense</option>
+      <option value="income" {% if txn and txn.amount_minor > 0 and not txn.is_transfer %}selected{% endif %}>Income</option>
+    </select>
+  </label></div>
+  <div class="row"><label>Description <input name="description" value="{{ txn.description if txn else '' }}" maxlength="255" required></label></div>
+  <div class="row"><label>Account
+    <select name="account_id" required>
+      {% for a in accounts %}<option value="{{ a.id }}" {% if txn and txn.account_id == a.id %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+    </select>
+  </label></div>
+  <div class="row"><label>Category
+    <select name="category_id">
+      <option value="">uncategorized</option>
+      {% for c in categories %}<option value="{{ c.id }}" {% if txn and txn.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+  </label></div>
+  <div class="row"><label>Notes <textarea name="notes" rows="2">{{ txn.notes if txn else '' }}</textarea></label></div>
+  <div class="row"><label><input type="checkbox" name="is_transfer" {% if txn and txn.is_transfer %}checked{% endif %}> Transfer (excluded from totals)</label></div>
+  <button type="submit">Save</button>
+  <a class="btn secondary" href="/transactions">Cancel</a>
+</form>
+{% endblock %}
