@@ -1,9 +1,4 @@
-"""Per-user isolation across M5 (rules) routes.
-
-The list/create/delete/move operations on /rules/* are scoped to the
-current user. The test exercises: user A creates a rule, user B
-cannot see, edit, or delete it.
-"""
+"""Per-user isolation across M5 (rules) and M6 (budgets, dashboard) routes."""
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
@@ -11,6 +6,7 @@ from sqlmodel import Session, select
 
 from app.auth.passwords import hash_password
 from app.db import get_engine
+from app.models.budget import Budget
 from app.models.category import Category
 from app.models.rule import Rule
 from app.models.user import User
@@ -75,3 +71,45 @@ def test_user_b_cannot_see_or_delete_user_a_rule(client: TestClient) -> None:
     with Session(get_engine()) as s:
         rule = s.get(Rule, rule_id)
         assert rule is not None  # still exists
+
+
+def test_user_b_cannot_see_or_delete_user_a_budget(client: TestClient) -> None:
+    a = _make_user("alice")
+    _make_user("bob")
+    with Session(get_engine()) as s:
+        cat_a = _first_category_id(a)
+        s.add(Budget(user_id=a, category_id=cat_a, month="2026-10", amount_minor=5000))
+        s.commit()
+        budget_id = s.exec(select(Budget).where(Budget.user_id == a)).first().id
+    csrf = _login_as(client, "bob")
+    r = client.get("/budgets")
+    assert r.status_code == 200
+    assert "5000" not in r.text  # Alice's amount
+    r = client.post(
+        f"/budgets/{budget_id}/delete",
+        data={"csrf_token": csrf},
+        follow_redirects=False,
+    )
+    assert r.status_code in (303, 404)
+    with Session(get_engine()) as s:
+        b = s.get(Budget, budget_id)
+        assert b is not None
+
+
+def test_user_b_dashboard_does_not_show_user_a_data(client: TestClient) -> None:
+    _make_user("alice")
+    _make_user("bob")
+    _login_as(client, "bob")
+    r = client.get("/dashboard")
+    assert r.status_code == 200
+    body = r.text
+    # The cards for income/expense/net should be 0 for Bob (no transactions).
+    import re
+
+    m = re.search(r'id="card-income"[^>]*?data-amount-minor="(\d+)"', body)
+    assert m is not None and m.group(1) == "0"
+    m = re.search(r'id="card-expense"[^>]*?data-amount-minor="(\d+)"', body)
+    assert m is not None and m.group(1) == "0"
+    # No progress block (no budgets set) - the table is replaced by a hint.
+    assert "No budgets set" in body
+

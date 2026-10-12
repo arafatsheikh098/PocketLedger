@@ -39,6 +39,9 @@ ignore = ["E501"]
 # FastAPI's File()/Form() are required to be defaults for the framework
 # to detect form fields; the B008 false-positive is unavoidable.
 "app/routers/imports.py" = ["B008"]
+# Nested with-statements keep freeze_time() and the Session in
+# visually distinct scopes; combining them hurts readability.
+"tests/test_month_boundaries.py" = ["SIM117"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

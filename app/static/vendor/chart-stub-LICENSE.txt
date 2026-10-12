@@ -1,0 +1,3 @@
+Stub chart renderer for PocketLedger. Not a real charting library;
+this is a small in-house renderer that draws the same numbers shown
+in the dashboard tables into <canvas> elements. No external code.

@@ -1,0 +1,92 @@
+{% extends "base.html.j2" %}
+{% block title %}Dashboard - PocketLedger{% endblock %}
+{% block content %}
+<h1>Dashboard - {{ month_str }}</h1>
+<p class="muted">All figures in your base currency. Transfers excluded.</p>
+
+<section class="cards" aria-label="This month summary">
+  <div class="card">
+    <div class="label">Income</div>
+    <div class="value amount-income" id="card-income"
+         data-amount-minor="{{ income_minor }}">{{ "%.2f"|format(income_minor / 100) }}</div>
+  </div>
+  <div class="card">
+    <div class="label">Expense</div>
+    <div class="value amount-expense" id="card-expense"
+         data-amount-minor="{{ expense_minor }}">{{ "%.2f"|format(expense_minor / 100) }}</div>
+  </div>
+  <div class="card">
+    <div class="label">Net</div>
+    <div class="value" id="card-net"
+         data-amount-minor="{{ net_minor }}">{{ "%.2f"|format(net_minor / 100) }}</div>
+  </div>
+</section>
+
+<h2>Top categories this month</h2>
+<table id="table-top">
+  <thead><tr><th>Category</th><th>Spent</th></tr></thead>
+  <tbody>
+    {% for r in top_rows %}
+      <tr><td>{{ r.name }}</td><td class="amount-expense"
+                                 data-amount-minor="{{ r.amount_minor }}">{{ "%.2f"|format(r.amount_minor / 100) }}</td></tr>
+    {% else %}
+      <tr><td colspan="2" class="muted">No expense yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<canvas id="chart-top"
+        data-labels='{{ top_rows|map(attribute="name")|list|tojson }}'
+        data-amounts='{{ top_rows|map(attribute="amount_minor")|list|tojson }}'></canvas>
+
+<h2>6-month trend</h2>
+<table id="table-trend">
+  <thead><tr><th>Month</th><th>Income</th><th>Expense</th></tr></thead>
+  <tbody>
+    {% for r in six_months %}
+      <tr data-label="{{ r.label }}">
+        <td>{{ r.label }}</td>
+        <td class="amount-income" data-amount-minor="{{ r.income_minor }}">{{ "%.2f"|format(r.income_minor / 100) }}</td>
+        <td class="amount-expense" data-amount-minor="{{ r.expense_minor }}">{{ "%.2f"|format(r.expense_minor / 100) }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<div class="charts">
+  <div><div class="muted">Income</div>
+    <canvas id="chart-trend"
+            data-labels='{{ six_months|map(attribute="label")|list|tojson }}'
+            data-income='{{ six_months|map(attribute="income_minor")|list|tojson }}'></canvas>
+  </div>
+  <div><div class="muted">Expense</div>
+    <canvas id="chart-trend-expense"
+            data-labels='{{ six_months|map(attribute="label")|list|tojson }}'
+            data-expense='{{ six_months|map(attribute="expense_minor")|list|tojson }}'></canvas>
+  </div>
+</div>
+
+<h2>Budget progress</h2>
+{% if progress %}
+  <table id="table-progress">
+    <thead><tr><th>Category</th><th>Budget</th><th>Spent</th><th>%</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for p in progress %}
+        <tr class="row-{{ p.status }}">
+          <td>{{ p.category_name }}</td>
+          <td data-amount-minor="{{ p.amount_minor }}">{{ "%.2f"|format(p.amount_minor / 100) }}</td>
+          <td class="amount-expense" data-amount-minor="{{ p.spent_minor }}">{{ "%.2f"|format(p.spent_minor / 100) }}</td>
+          <td>{{ p.pct }}%</td>
+          <td>
+            {% if p.status == "ok" %}<span class="badge ok">ok</span>
+            {% elif p.status == "warning" %}<span class="badge warn">warning</span>
+            {% else %}<span class="badge over">over</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p class="muted">No budgets set for {{ month_str }}. <a href="/budgets?month={{ month_str }}">Create one</a>.</p>
+{% endif %}
+
+<script src="/static/vendor/chart-stub.js" defer></script>
+{% endblock %}

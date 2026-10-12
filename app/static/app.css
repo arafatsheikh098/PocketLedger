@@ -30,3 +30,16 @@ form .row label { display:block; font-weight:600; margin-bottom:0.2rem; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .amount-expense { color: var(--bad); }
 .amount-income { color: var(--ok); }
+.badge { display:inline-block; padding:0.1rem 0.5rem; border-radius: 10px; font-size: 0.85em; font-weight: 600; }
+.badge.ok { background: #c6f6d5; color: #22543d; }
+.badge.warn { background: #feebc8; color: #7b341e; }
+.badge.over { background: #fed7d7; color: #742a2a; }
+tr.row-warning { background: #fffaf0; }
+tr.row-over { background: #fff5f5; }
+.cards { display:flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+.card { flex: 1 1 200px; padding: 1rem; border: 1px solid #ddd; border-radius: 6px; background: white; }
+.card .label { color: var(--muted); font-size: 0.9rem; }
+.card .value { font-size: 1.4rem; font-weight: 700; margin-top: 0.2rem; }
+canvas { max-width: 100%; }
+.charts { display:flex; flex-wrap:wrap; gap: 1rem; align-items:flex-start; }
+.charts > div { flex: 1 1 320px; padding: 0.5rem; border:1px solid #eee; border-radius: 6px; background:white; }

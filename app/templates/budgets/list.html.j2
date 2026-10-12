@@ -1,0 +1,80 @@
+{% extends "base.html.j2" %}
+{% block title %}Budgets - PocketLedger{% endblock %}
+{% block content %}
+<h1>Budgets for {{ month_str }}</h1>
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+<p class="muted">
+  80% of a budget lights up <span class="badge warn">warning</span>;
+  hitting 100% lights up <span class="badge over">over</span>. Transfers
+  between your own accounts are always excluded.
+</p>
+
+<form method="get" action="/budgets" class="filters">
+  <div class="row"><label>Month <input type="month" name="month" value="{{ month_str }}"></label></div>
+  <button type="submit" class="secondary">Switch</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Budget</th>
+      <th>Spent</th>
+      <th>Remaining</th>
+      <th>%</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in rows %}
+      <tr class="row-{{ p.status }}">
+        <td>{{ categories_by_id.get(p.budget.category_id, '?') }}</td>
+        <td>{{ "%.2f"|format(p.budget.amount_minor / 100) }}</td>
+        <td>{{ "%.2f"|format(p.spent_minor / 100) }}</td>
+        <td>{{ "%.2f"|format(p.remaining_minor / 100) }}</td>
+        <td>{{ p.pct }}%</td>
+        <td>
+          {% if p.status == "ok" %}<span class="badge ok">ok</span>
+          {% elif p.status == "warning" %}<span class="badge warn">warning</span>
+          {% else %}<span class="badge over">over</span>{% endif %}
+        </td>
+        <td>
+          <form method="post" action="/budgets/{{ p.budget.id }}/delete" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="secondary"
+                    onclick="return confirm('Delete this budget?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">No budgets for this month yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Set / update a budget</h2>
+{% if categories %}
+  <form method="post" action="/budgets">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row">
+      <label>Category
+        <select name="category_id" required>
+          {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <label>Month <input type="month" name="month" value="{{ month_str }}" required></label>
+    </div>
+    <div class="row">
+      <label>Amount
+        <input name="amount" required placeholder="e.g. 300.00">
+      </label>
+    </div>
+    <button type="submit">Save</button>
+  </form>
+{% else %}
+  <p class="muted">Create at least one category first.</p>
+{% endif %}
+{% endblock %}
