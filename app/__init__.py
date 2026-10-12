@@ -68,15 +68,17 @@ def _seed_if_requested(settings: Settings) -> None:
     """If SEED_ON_START is on, seed the demo user with 6 months of data.
 
     The seeder is idempotent: if the demo user already has any
-    transaction, the call is a no-op.
+    transaction, the call is a no-op. Tables must exist before
+    the seeder runs, so we call create_db_and_tables() first.
     """
     if not settings.seed_on_start:
         return
     from sqlmodel import Session as _S
 
-    from .db import get_engine
+    from .db import create_db_and_tables, get_engine
     from .demo import ensure_demo_user, seed_demo_data
 
+    create_db_and_tables()
     with _S(get_engine()) as s:
         u = ensure_demo_user(s)
         seed_demo_data(s, u)
