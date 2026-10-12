@@ -1,0 +1,50 @@
+# Render Blueprint for the public PocketLedger demo.
+#
+# This is the "D" deployment-prep artifact. One service, persistent
+# disk for the SQLite database, environment variables to put the app
+# in demo mode on first boot so anyone who lands on the URL gets a
+# working demo account (demo / demo1234) with 6 months of fake data.
+#
+# Render runs the service on a free instance type for the demo; the
+# persistent disk is what survives restarts. Backup.sh is a wrapper
+# around `sqlite3 .backup`; run it from a shell against the same
+# disk.
+#
+# To deploy from scratch:
+#   1. Create a new Render Web Service from this repo.
+#   2. Render reads render.yaml and provisions the service.
+#   3. Set SECRET_KEY to a long random string in the Render dashboard
+#      (or via `render env-vars set`).
+#   4. Hit https://<service>.onrender.com/ and log in as demo.
+services:
+  - type: web
+    name: pocketledger-demo
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:////var/data/pocketledger.db
+      - key: ALLOW_REGISTRATION
+        value: "false"
+      - key: DEMO_MODE
+        value: "true"
+      - key: SEED_ON_START
+        value: "true"
+      - key: USER_TIMEZONE
+        value: UTC
+      - key: DEFAULT_CURRENCY
+        value: USD
+      - key: PYTHON_VERSION
+        value: 3.12.10
+    disk:
+      name: pocketledger-data
+      mountPath: /var/data
+      sizeGB: 1
