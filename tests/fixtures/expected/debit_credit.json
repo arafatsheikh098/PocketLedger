@@ -1,0 +1,13 @@
+{
+  "delimiter": ",",
+  "encoding": "utf-8",
+  "date_format": "%Y/%m/%d",
+  "amount_mode": "debit_credit",
+  "expenses_are_positive": true,
+  "rows": [
+    {"date": "2026-10-01", "description": "Rent", "amount_minor": -120000, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-02", "description": "Refund", "amount_minor": 5000, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-03", "description": "Groceries", "amount_minor": -8240, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-04", "description": "Payroll", "amount_minor": 320000, "is_transfer": false, "status": "new"}
+  ]
+}

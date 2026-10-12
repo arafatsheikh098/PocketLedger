@@ -1,0 +1,12 @@
+{
+  "delimiter": ",",
+  "encoding": "utf-8",
+  "date_format": "%d/%m/%Y",
+  "amount_mode": "signed",
+  "rows": [
+    {"date": "2026-10-01", "description": "Local shop", "amount_minor": 1234, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-02", "description": "Salary", "amount_minor": 180000, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-03", "description": "Local shop", "amount_minor": 1234, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-15", "description": "Cinema", "amount_minor": -999, "is_transfer": false, "status": "new"}
+  ]
+}

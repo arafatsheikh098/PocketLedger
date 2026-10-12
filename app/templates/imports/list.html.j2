@@ -1,0 +1,37 @@
+{% extends "base.html.j2" %}
+{% block title %}Imports - PocketLedger{% endblock %}
+{% block content %}
+<h1>Imports</h1>
+<p><a class="btn" href="/imports/new">Import a CSV</a></p>
+{% if request.query_params.get('undone') %}
+<p class="flash ok">Removed {{ request.query_params.get('undone') }} transactions from the batch.</p>
+{% endif %}
+{% if request.query_params.get('error') %}
+<p class="flash error">{{ request.query_params.get('error') }}</p>
+{% endif %}
+<table>
+  <thead><tr><th>Filename</th><th>Account</th><th>Created</th><th>Rows</th><th>Undone</th><th></th></tr></thead>
+  <tbody>
+  {% for b in batches %}
+    <tr>
+      <td>{{ b.filename }}</td>
+      <td>{{ b.account_id }}</td>
+      <td>{{ b.created_at }}</td>
+      <td>{{ b.row_count }}</td>
+      <td>{{ "yes" if b.undone else "no" }}</td>
+      <td>
+        <a class="btn secondary" href="/imports/{{ b.id }}">View</a>
+        {% if not b.undone %}
+        <form method="post" action="/imports/{{ b.id }}/undo" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="secondary" onclick="return confirm('Undo this import?')">Undo</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="muted">No imports yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

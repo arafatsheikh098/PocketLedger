@@ -1,0 +1,60 @@
+{% extends "base.html.j2" %}
+{% block title %}Map columns - PocketLedger{% endblock %}
+{% block content %}
+<h1>Map columns</h1>
+<p class="muted">Detected encoding <code>{{ detection.encoding }}</code>, delimiter <code>{{ detection.delimiter | replace('\t', '\\t') }}</code>. First {{ preview | length }} rows:</p>
+<table>
+  <thead><tr>{% for cell in preview[0] %}<th>{{ loop.index0 }}: {{ cell }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for row in preview[1:] %}
+    <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<form method="post" action="/imports/dry-run">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <input type="hidden" name="account_id" value="{{ account_id }}">
+  <input type="hidden" name="tmp_path" value="{{ tmp_path }}">
+
+  <div class="row"><label>Date column (0-based index) <input name="date_col" type="number" min="0" value="0" required></label></div>
+  <div class="row"><label>Date format
+    <select name="date_format" required>
+      {% for f in date_formats %}<option value="{{ f }}">{{ f }}</option>{% endfor %}
+    </select>
+  </label></div>
+  <div class="row"><label>Description column <input name="description_col" type="number" min="0" value="1" required></label></div>
+
+  <h3>Amounts</h3>
+  <div class="row"><label>Mode
+    <select name="amount_mode" id="amount_mode" onchange="document.getElementById('signed').style.display=this.value==='signed'?'block':'none'; document.getElementById('split').style.display=this.value==='debit_credit'?'block':'none';">
+      <option value="signed">Single signed column</option>
+      <option value="debit_credit">Separate debit / credit columns</option>
+    </select>
+  </label></div>
+  <div id="signed"><div class="row"><label>Amount column <input name="amount_col" type="number" min="0" value="2"></label></div></div>
+  <div id="split" style="display:none">
+    <div class="row"><label>Debit column <input name="debit_col" type="number" min="0" value="2"></label></div>
+    <div class="row"><label>Credit column <input name="credit_col" type="number" min="0" value="3"></label></div>
+    <div class="row"><label><input type="checkbox" name="expenses_are_positive" checked> Bank uses positive numbers for expenses</label></div>
+  </div>
+
+  <div class="row"><label>Decimal separator
+    <select name="decimal_sep">
+      <option value=".">.</option>
+      <option value=",">,</option>
+    </select>
+  </label></div>
+  <div class="row"><label>Thousands separator
+    <select name="thousands_sep">
+      <option value=",">,</option>
+      <option value=".">.</option>
+      <option value=" ">(space)</option>
+      <option value="">(none)</option>
+    </select>
+  </label></div>
+
+  <button type="submit">Dry run</button>
+  <a class="btn secondary" href="/imports">Cancel</a>
+</form>
+{% endblock %}

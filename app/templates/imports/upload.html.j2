@@ -1,0 +1,16 @@
+{% extends "base.html.j2" %}
+{% block title %}Import - PocketLedger{% endblock %}
+{% block content %}
+<h1>Import a CSV</h1>
+{% if request.query_params.get('error') %}<div class="flash error">{{ request.query_params.get('error') }}</div>{% endif %}
+<form method="post" action="/imports/upload" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <div class="row"><label>Account
+    <select name="account_id" required>
+      {% for a in accounts %}<option value="{{ a.id }}">{{ a.name }} ({{ a.type }})</option>{% endfor %}
+    </select>
+  </label></div>
+  <div class="row"><label>CSV file <input type="file" name="file" accept=".csv,text/csv" required></label></div>
+  <button type="submit">Next: choose columns</button>
+</form>
+{% endblock %}

@@ -1,0 +1,14 @@
+{
+  "delimiter": ";",
+  "encoding": "utf-8",
+  "date_format": "%d.%m.%Y",
+  "amount_mode": "signed",
+  "decimal_sep": ",",
+  "thousands_sep": ".",
+  "rows": [
+    {"date": "2026-10-01", "description": "Bäckerei", "amount_minor": -350, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-02", "description": "Gehalt", "amount_minor": 250000, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-03", "description": "Bäckerei", "amount_minor": -350, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-04", "description": "Tankstelle", "amount_minor": -6500, "is_transfer": false, "status": "new"}
+  ]
+}

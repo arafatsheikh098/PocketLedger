@@ -1,0 +1,43 @@
+{% extends "base.html.j2" %}
+{% block title %}Dry run - PocketLedger{% endblock %}
+{% block content %}
+<h1>Dry run</h1>
+<p class="muted">Encoding <code>{{ result.detection.encoding }}</code>, delimiter <code>{{ result.detection.delimiter | replace('\t', '\\t') }}</code></p>
+<p>
+  <span class="flash ok">{{ result.new_count }} new</span>
+  <span class="muted"> &middot; </span>
+  <span class="muted">{{ result.duplicate_count }} duplicates (skipped)</span>
+  <span class="muted"> &middot; </span>
+  <span class="flash error">{{ result.error_count }} errors</span>
+</p>
+<table>
+  <thead><tr><th>Line</th><th>Status</th><th>Date</th><th>Description</th><th>Amount</th><th>Reason</th></tr></thead>
+  <tbody>
+  {% for r in result.rows %}
+    <tr>
+      <td>{{ r.line_number }}</td>
+      <td>
+        {% if r.status == 'new' %}<span style="color: var(--ok);">new</span>
+        {% elif r.status == 'duplicate' %}<span class="muted">duplicate</span>
+        {% else %}<span class="flash error">error</span>{% endif %}
+        {% if r.is_transfer %} <span class="muted">(transfer)</span>{% endif %}
+      </td>
+      <td>{{ r.date or '' }}</td>
+      <td>{{ r.description }}</td>
+      <td>{% if r.amount_minor is not none %}{{ "%.2f"|format(r.amount_minor / 100) }}{% endif %}</td>
+      <td>{{ r.reason or '' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<form method="post" action="/imports/commit">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <input type="hidden" name="account_id" value="{{ account_id }}">
+  <input type="hidden" name="tmp_path" value="{{ tmp_path }}">
+  <input type="hidden" name="mapping_json" value='{{ mapping_json }}'>
+  <input type="hidden" name="filename" value="{{ result.detection.encoding }}.csv">
+  <button type="submit" {% if result.new_count == 0 %}disabled{% endif %}>Commit {{ result.new_count }} new rows</button>
+  <a class="btn secondary" href="/imports">Cancel</a>
+</form>
+{% endblock %}

@@ -1,0 +1,13 @@
+{
+  "delimiter": ",",
+  "encoding": "utf-8",
+  "date_format": "%Y-%m-%d",
+  "amount_mode": "signed",
+  "decimal_sep": ".",
+  "thousands_sep": ",",
+  "rows": [
+    {"date": "2026-10-01", "description": "Car payment", "amount_minor": -123456, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-02", "description": "Bonus", "amount_minor": 1250000, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-03", "description": "Car payment", "amount_minor": -123456, "is_transfer": false, "status": "new"}
+  ]
+}

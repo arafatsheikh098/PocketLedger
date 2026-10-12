@@ -1,0 +1,12 @@
+{
+  "delimiter": ",",
+  "encoding": "utf-8",
+  "date_format": "%Y-%m-%d",
+  "amount_mode": "signed",
+  "rows": [
+    {"date": "2026-10-01", "description": "Whole Foods", "amount_minor": -4567, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-02", "description": "Acme Corp Salary", "amount_minor": 250000, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-03", "description": "Starbucks", "amount_minor": -450, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-04", "description": "Whole Foods", "amount_minor": -4567, "is_transfer": false, "status": "new"}
+  ]
+}

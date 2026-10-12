@@ -1,0 +1,12 @@
+{
+  "delimiter": ",",
+  "encoding": "utf-8",
+  "date_format": "%Y-%m-%d",
+  "amount_mode": "signed",
+  "rows": [
+    {"date": "2026-10-01", "description": "Bread, milk, eggs", "amount_minor": -1234, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-02", "description": "Coffee, large", "amount_minor": -350, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-03", "description": "Coffee, large", "amount_minor": -350, "is_transfer": false, "status": "new"},
+    {"date": "2026-10-04", "description": "Coffee, large", "amount_minor": -350, "is_transfer": false, "status": "new"}
+  ]
+}
