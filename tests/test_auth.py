@@ -170,3 +170,35 @@ def test_login_rate_limit(client: TestClient, make_user) -> None:
     )
     assert r.status_code == 200
     assert "too many" in r.text.lower()
+
+
+def test_login_attempts_cleanup() -> None:
+    from datetime import UTC, datetime, timedelta
+
+    from app.auth.rate_limit import cleanup_old_attempts
+    from app.models.login_attempt import LoginAttempt
+
+    with Session(get_engine()) as s:
+        # Create an attempt from 10 days ago and an attempt from today
+        old_attempt = LoginAttempt(
+            username="testuser",
+            ip="127.0.0.1",
+            success=False,
+            created_at=datetime.now(UTC) - timedelta(days=10),
+        )
+        recent_attempt = LoginAttempt(
+            username="testuser",
+            ip="127.0.0.1",
+            success=False,
+            created_at=datetime.now(UTC),
+        )
+        s.add(old_attempt)
+        s.add(recent_attempt)
+        s.commit()
+
+        purged = cleanup_old_attempts(s, retention=timedelta(days=7))
+        assert purged >= 1
+
+        remaining = s.query(LoginAttempt).filter(LoginAttempt.username == "testuser").all()
+        assert len(remaining) == 1
+        assert remaining[0].id == recent_attempt.id

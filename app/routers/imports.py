@@ -1,6 +1,12 @@
 """CSV import wizard routes."""
 from __future__ import annotations
 
+import contextlib
+import os
+import secrets
+import tempfile
+import time
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
@@ -16,6 +22,53 @@ from ..services import csv_detect, import_batch, mapping
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 templates = Jinja2Templates(directory="app/templates")
+
+IMPORTS_DIR = Path(tempfile.gettempdir()) / "pocketledger-imports"
+
+
+def _ensure_imports_dir() -> Path:
+    IMPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    with contextlib.suppress(OSError):
+        os.chmod(IMPORTS_DIR, 0o700)
+    return IMPORTS_DIR
+
+
+def _cleanup_old_imports(max_age_seconds: int = 3600) -> None:
+    with contextlib.suppress(OSError):
+        now = time.time()
+        if IMPORTS_DIR.is_dir():
+            for p in IMPORTS_DIR.iterdir():
+                if p.is_file() and (now - p.stat().st_mtime > max_age_seconds):
+                    with contextlib.suppress(OSError):
+                        p.unlink()
+
+
+def _resolve_staged_file(user_id: int, token_or_path: str) -> Path:
+    """Safely resolve an uploaded temp file, preventing path traversal and cross-user leaks."""
+    _ensure_imports_dir()
+    base_dir = IMPORTS_DIR.resolve()
+
+    cleaned = token_or_path.strip()
+    if "/" not in cleaned and "\\" not in cleaned:
+        if cleaned.endswith(".csv"):
+            candidate = (IMPORTS_DIR / cleaned).resolve()
+        else:
+            candidate = (IMPORTS_DIR / f"{user_id}_{cleaned}.csv").resolve()
+    else:
+        candidate = Path(cleaned).resolve()
+
+    try:
+        candidate.relative_to(base_dir)
+    except ValueError:
+        raise HTTPException(400, "Invalid upload path") from None
+
+    if not candidate.name.startswith(f"{user_id}_"):
+        raise HTTPException(403, "Access denied to upload session")
+
+    if not candidate.is_file():
+        raise HTTPException(400, "upload session expired; please re-upload")
+
+    return candidate
 
 
 @router.get("")
@@ -79,15 +132,13 @@ def upload(
         preview = csv_detect.preview(det.text, det.delimiter, 20)
     except Exception as exc:
         return _upload_error(f"could not parse file: {exc}")
-    # Save the raw file in a temp file for the next step.
-    import os
-    import tempfile
-
-    os.makedirs("/tmp/pocketledger-imports", exist_ok=True)
-    tmp_path = os.path.join(
-        tempfile.mkdtemp(prefix="pl-imp-", dir="/tmp/pocketledger-imports"), file.filename
-    )
-    with open(tmp_path, "wb") as f:
+    # Save the raw file in a secure temp file bound to this user.
+    _cleanup_old_imports()
+    _ensure_imports_dir()
+    token = secrets.token_hex(16)
+    staged_path = IMPORTS_DIR / f"{user.id}_{token}.csv"
+    fd = os.open(staged_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "wb") as f:
         f.write(raw)
     return templates.TemplateResponse(
         request,
@@ -99,7 +150,7 @@ def upload(
             "csrf_token": request.cookies.get("pocketledger_csrf", ""),
             "accounts": [scoped_get(session, user.id, Account, account_id)],
             "account_id": account_id,
-            "tmp_path": tmp_path,
+            "tmp_path": token,
             "filename": file.filename,
             "detection": {"encoding": det.encoding, "delimiter": det.delimiter},
             "preview": preview,
@@ -134,11 +185,8 @@ def dry_run(
     thousands_sep: str = Form(","),
     expenses_are_positive: Annotated[str | None, Form()] = None,
 ):
-    import os
-
-    if not os.path.exists(tmp_path):
-        raise HTTPException(400, "upload session expired; please re-upload")
-    with open(tmp_path, "rb") as f:
+    staged_file = _resolve_staged_file(user.id, tmp_path)
+    with open(staged_file, "rb") as f:
         raw = f.read()
     m = mapping.Mapping(
         date_col=date_col,
@@ -182,11 +230,8 @@ def commit(
     mapping_json: str = Form(...),
     filename: str = Form(...),
 ):
-    import os
-
-    if not os.path.exists(tmp_path):
-        raise HTTPException(400, "upload session expired; please re-upload")
-    with open(tmp_path, "rb") as f:
+    staged_file = _resolve_staged_file(user.id, tmp_path)
+    with open(staged_file, "rb") as f:
         raw = f.read()
     m = mapping.Mapping.from_json(mapping_json)
     try:
@@ -201,6 +246,9 @@ def commit(
         )
     except mapping.RowError as exc:
         return RedirectResponse(f"/imports?error={str(exc)}", status_code=303)
+    finally:
+        with contextlib.suppress(OSError):
+            staged_file.unlink()
     return RedirectResponse(f"/imports/{batch.id}", status_code=303)
 
 

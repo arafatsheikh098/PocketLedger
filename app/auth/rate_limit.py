@@ -34,6 +34,19 @@ def is_locked(session: Session, username: str, ip: str) -> bool:
     return recent_failures(session, username, ip) >= MAX_FAILS
 
 
+def cleanup_old_attempts(session: Session, retention: timedelta = timedelta(days=7)) -> int:
+    """Purge login attempt records older than the retention period."""
+    cutoff = datetime.now(UTC) - retention
+    stmt = select(LoginAttempt).where(LoginAttempt.created_at < cutoff)
+    old = session.exec(stmt).all()
+    for row in old:
+        session.delete(row)
+    if old:
+        session.commit()
+    return len(old)
+
+
 def record(session: Session, username: str, ip: str, success: bool) -> None:
+    cleanup_old_attempts(session)
     session.add(LoginAttempt(username=username, ip=ip, success=success))
     session.commit()
