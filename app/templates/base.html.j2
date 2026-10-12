@@ -13,7 +13,24 @@
   <header class="topbar">
     <a class="brand" href="/">PocketLedger</a>
     <nav>
-      {% if user %}<a href="/transactions">Transactions</a><a href="/accounts">Accounts</a><a href="/categories">Categories</a><a href="/rules">Rules</a><a href="/budgets">Budgets</a><a href="/dashboard">Dashboard</a><a href="/imports">Import</a><a href="/exports">Export</a><a href="/auth/change-password">Password</a><form method="post" action="/auth/logout" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="link">Logout</button></form>{% else %}<a href="/auth/login">Login</a>{% if allow_registration %}<a href="/auth/register">Register</a>{% endif %}{% endif %}
+      {% if user %}
+        <a href="/transactions">Transactions</a>
+        <a href="/accounts">Accounts</a>
+        <a href="/categories">Categories</a>
+        <a href="/rules">Rules</a>
+        <a href="/budgets">Budgets</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/imports">Import</a>
+        <a href="/exports">Export</a>
+        <a href="/auth/change-password">Password</a>
+        <form method="post" action="/auth/logout" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="link">Logout</button>
+        </form>
+      {% else %}
+        <a href="/auth/login">Login</a>
+        {% if allow_registration %}<a href="/auth/register">Register</a>{% endif %}
+      {% endif %}
     </nav>
   </header>
   <main>

@@ -1,6 +1,33 @@
 {% extends "base.html.j2" %}
 {% block title %}PocketLedger{% endblock %}
 {% block content %}
-<h1>Welcome, {{ user.username }}</h1>
-<p>You are logged in. Use the navigation above.</p>
+<div class="page-header">
+  <div>
+    <h1>Welcome, {{ user.username }}</h1>
+    <div class="subtitle">Use the navigation above to manage your finances.</div>
+  </div>
+</div>
+
+<div class="cards">
+  <a class="card" href="/dashboard" style="text-decoration:none;color:inherit">
+    <div class="label">Dashboard</div>
+    <div class="value" style="font-size:1.1rem">This month at a glance</div>
+    <div class="muted" style="margin-top:0.5rem">Income, expense, top categories, 6-month trend, budget progress.</div>
+  </a>
+  <a class="card" href="/transactions" style="text-decoration:none;color:inherit">
+    <div class="label">Transactions</div>
+    <div class="value" style="font-size:1.1rem">Browse and filter</div>
+    <div class="muted" style="margin-top:0.5rem">Add, edit, delete, and search your transactions.</div>
+  </a>
+  <a class="card" href="/imports" style="text-decoration:none;color:inherit">
+    <div class="label">Import</div>
+    <div class="value" style="font-size:1.1rem">Bring in a CSV</div>
+    <div class="muted" style="margin-top:0.5rem">Detect encoding, map columns, dry-run, then commit.</div>
+  </a>
+  <a class="card" href="/exports" style="text-decoration:none;color:inherit">
+    <div class="label">Export</div>
+    <div class="value" style="font-size:1.1rem">Download your data</div>
+    <div class="muted" style="margin-top:0.5rem">CSV or XLSX with a monthly summary sheet.</div>
+  </a>
+</div>
 {% endblock %}

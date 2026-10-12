@@ -1,17 +1,29 @@
 {% extends "base.html.j2" %}
 {% block title %}Transactions - PocketLedger{% endblock %}
 {% block content %}
-<h1>Transactions</h1>
+<div class="page-header">
+  <div>
+    <h1>Transactions</h1>
+    <div class="subtitle">
+      Income this period: <span class="amount-income">{{ "%.2f"|format(totals.income / 100) }}</span> &middot;
+      Expense: <span class="amount-expense">{{ "%.2f"|format(totals.expense / 100) }}</span> &middot;
+      Net: {{ "%.2f"|format(totals.net / 100) }} (transfers excluded)
+    </div>
+  </div>
+  <div class="actions">
+    <form method="post" action="/transactions/reapply-rules" class="inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="secondary"
+              title="Re-apply auto-categorization rules to uncategorized rows only">
+        Re-apply rules
+      </button>
+    </form>
+    <a class="btn" href="/transactions/new">New transaction</a>
+  </div>
+</div>
+
 {% if info %}<div class="flash info">{{ info }}</div>{% endif %}
 {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
-<p class="muted">Income this period: <span class="amount-income">{{ "%.2f"|format(totals.income / 100) }}</span> &middot; Expense: <span class="amount-expense">{{ "%.2f"|format(totals.expense / 100) }}</span> &middot; Net: {{ "%.2f"|format(totals.net / 100) }} (transfers excluded)</p>
-<form method="post" action="/transactions/reapply-rules" class="inline">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-  <button type="submit" class="secondary"
-          title="Re-apply auto-categorization rules to uncategorized rows only">
-    Re-apply rules
-  </button>
-</form>
 
 <form method="get" action="/transactions" class="filters">
   <div class="row"><label>From <input type="date" name="date_from" value="{{ filters.date_from or '' }}"></label></div>
@@ -39,29 +51,39 @@
       <option value="description_asc" {% if filters.sort == 'description_asc' %}selected{% endif %}>Description (A-Z)</option>
     </select>
   </label></div>
-  <button type="submit">Apply</button>
-  <a class="btn secondary" href="/transactions">Reset</a>
-  <a class="btn" href="/transactions/new">New transaction</a>
+  <div class="row" style="display:flex;gap:0.4rem;align-items:flex-end">
+    <button type="submit">Apply</button>
+    <a class="btn secondary" href="/transactions">Reset</a>
+  </div>
 </form>
 
 <table>
-  <thead><tr><th>Date</th><th>Description</th><th>Account</th><th>Category</th><th>Amount</th><th></th></tr></thead>
+  <thead><tr>
+    <th>Date</th>
+    <th>Description</th>
+    <th>Account</th>
+    <th>Category</th>
+    <th style="text-align:right">Amount</th>
+    <th></th>
+  </tr></thead>
   <tbody>
   {% for t in rows %}
     <tr>
       <td>{{ t.date }}</td>
-      <td>{{ t.description }}{% if t.is_transfer %} <span class="muted">(transfer)</span>{% endif %}</td>
+      <td>{{ t.description }}{% if t.is_transfer %} <span class="badge muted">transfer</span>{% endif %}</td>
       <td>{{ (accounts | selectattr('id', 'equalto', t.account_id) | first).name if accounts | selectattr('id', 'equalto', t.account_id) else '?' }}</td>
       <td>
         {% if t.category_id %}{{(categories | selectattr('id', 'equalto', t.category_id) | first).name if categories | selectattr('id', 'equalto', t.category_id) else '?'}}{% else %}<span class="muted">uncategorized</span>{% endif %}
       </td>
-      <td class="{% if t.amount_minor < 0 %}amount-expense{% elif t.amount_minor > 0 %}amount-income{% endif %}">{{ "%.2f"|format(t.amount_minor / 100) }}</td>
+      <td class="{% if t.amount_minor < 0 %}amount-expense{% elif t.amount_minor > 0 %}amount-income{% endif %}" style="text-align:right">{{ "%.2f"|format(t.amount_minor / 100) }}</td>
       <td>
-        <a class="btn secondary" href="/transactions/{{ t.id }}/edit">Edit</a>
-        <form method="post" action="/transactions/{{ t.id }}/delete" class="inline">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="secondary" onclick="return confirm('Delete this transaction?')">Delete</button>
-        </form>
+        <div class="btn-group">
+          <a class="btn secondary" href="/transactions/{{ t.id }}/edit">Edit</a>
+          <form method="post" action="/transactions/{{ t.id }}/delete" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="secondary" onclick="return confirm('Delete this transaction?')">Delete</button>
+          </form>
+        </div>
       </td>
     </tr>
   {% else %}
@@ -71,10 +93,11 @@
 </table>
 <p class="muted">Page {{ page }} of {{ pages }} &middot; {{ total }} total</p>
 {% if pages > 1 %}
-<p>
+<div class="pagination">
   {% for p in range(1, pages + 1) %}
-    <a class="btn secondary" href="/transactions?page={{ p }}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.account_id %}&account_id={{ filters.account_id }}{% endif %}{% if filters.category_id %}&category_id={{ filters.category_id }}{% endif %}{% if filters.text %}&text={{ filters.text }}{% endif %}{% if filters.only_uncategorized %}&only_uncategorized=true{% endif %}{% if filters.sort %}&sort={{ filters.sort }}{% endif %}">{{ p }}</a>
+    {% if p == page %}<span class="current">{{ p }}</span>
+    {% else %}<a href="/transactions?page={{ p }}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.account_id %}&account_id={{ filters.account_id }}{% endif %}{% if filters.category_id %}&category_id={{ filters.category_id }}{% endif %}{% if filters.text %}&text={{ filters.text }}{% endif %}{% if filters.only_uncategorized %}&only_uncategorized=true{% endif %}{% if filters.sort %}&sort={{ filters.sort }}{% endif %}">{{ p }}</a>{% endif %}
   {% endfor %}
-</p>
+</div>
 {% endif %}
 {% endblock %}

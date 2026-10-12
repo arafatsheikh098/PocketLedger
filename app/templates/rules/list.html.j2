@@ -1,21 +1,22 @@
 {% extends "base.html.j2" %}
 {% block title %}Rules - PocketLedger{% endblock %}
 {% block content %}
-<h1>Categorization rules</h1>
-<p class="muted">
-  Rules auto-assign a category to every transaction whose description
-  contains the pattern (case-insensitive). The first match in this list
-  wins. Rules never overwrite a category you have assigned by hand.
-</p>
+<div class="page-header">
+  <div>
+    <h1>Categorization rules</h1>
+    <div class="subtitle">Rules auto-assign a category when a description contains the pattern (case-insensitive). First match wins. Manual choices are sticky.</div>
+  </div>
+</div>
+
 {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
 
 <table>
   <thead>
     <tr>
-      <th>#</th>
+      <th style="width:3rem">#</th>
       <th>Pattern</th>
       <th>Category</th>
-      <th>Order</th>
+      <th>Reorder</th>
       <th></th>
     </tr>
   </thead>
@@ -26,14 +27,16 @@
         <td><code>{{ r.pattern }}</code></td>
         <td>{{ categories_by_id.get(r.category_id, '?') }}</td>
         <td>
-          <form method="post" action="/rules/{{ r.id }}/up" class="inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button class="secondary" type="submit" title="Move up">&uarr;</button>
-          </form>
-          <form method="post" action="/rules/{{ r.id }}/down" class="inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button class="secondary" type="submit" title="Move down">&darr;</button>
-          </form>
+          <div class="btn-group">
+            <form method="post" action="/rules/{{ r.id }}/up" class="inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="secondary" type="submit" title="Move up">&uarr;</button>
+            </form>
+            <form method="post" action="/rules/{{ r.id }}/down" class="inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="secondary" type="submit" title="Move down">&darr;</button>
+            </form>
+          </div>
         </td>
         <td>
           <form method="post" action="/rules/{{ r.id }}/delete" class="inline">
@@ -51,7 +54,7 @@
 
 <h2>Add rule</h2>
 {% if categories %}
-  <form method="post" action="/rules">
+  <form method="post" action="/rules" class="filters" style="grid-template-columns: 2fr 1fr auto">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="row">
       <label>Pattern
@@ -66,7 +69,7 @@
         </select>
       </label>
     </div>
-    <button type="submit">Add rule</button>
+    <div class="row" style="display:flex;align-items:flex-end"><button type="submit">Add rule</button></div>
   </form>
 {% else %}
   <p class="muted">Create at least one category before adding rules.</p>
