@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from ..auth.scoped import scoped_get, scoped_query
 from ..models.category import Category
 from ..models.transaction import Transaction
-from ..routers.deps import CurrentUser, SessionDep, require_csrf
+from ..routers.deps import CurrentUser, SessionDep, is_demo, require_csrf
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 templates = Jinja2Templates(directory="app/templates")
@@ -37,7 +37,7 @@ def list_categories(request: Request, user: CurrentUser, session: SessionDep):
         "categories/list.html.j2",
         {
             "user": user,
-            "demo_mode": False,
+            "demo_mode": is_demo(request),
             "allow_registration": False,
             "csrf_token": request.cookies.get("pocketledger_csrf", ""),
             "categories": categories,

@@ -78,6 +78,17 @@ def settings_dep():
     return get_settings()
 
 
+def is_demo(request: Request) -> bool:
+    """Read the demo-mode flag from app state for the current request.
+
+    Centralised so we never hardcode ``demo_mode: False`` in route
+    context dicts. M7 changed the assumption: demo mode is now a
+    real, runtime flag and the banner must follow it everywhere.
+    """
+    settings = getattr(request.app.state, "settings", None)
+    return bool(settings and settings.demo_mode)
+
+
 def make_csrf_for_user() -> str:
     return make_csrf_token()
 

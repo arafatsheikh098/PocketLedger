@@ -11,7 +11,7 @@ from ..auth.scoped import scoped_get, scoped_query
 from ..models.account import Account
 from ..models.import_batch import ImportBatch
 from ..models.transaction import Transaction
-from ..routers.deps import CurrentUser, SessionDep, require_csrf
+from ..routers.deps import CurrentUser, SessionDep, is_demo, require_csrf
 from ..services import csv_detect, import_batch, mapping
 
 router = APIRouter(prefix="/imports", tags=["imports"])
@@ -28,7 +28,7 @@ def list_imports(request: Request, user: CurrentUser, session: SessionDep):
         "imports/list.html.j2",
         {
             "user": user,
-            "demo_mode": False,
+            "demo_mode": is_demo(request),
             "allow_registration": False,
             "csrf_token": request.cookies.get("pocketledger_csrf", ""),
             "batches": batches,
@@ -46,7 +46,7 @@ def new_form(request: Request, user: CurrentUser, session: SessionDep):
         "imports/upload.html.j2",
         {
             "user": user,
-            "demo_mode": False,
+            "demo_mode": is_demo(request),
             "allow_registration": False,
             "csrf_token": request.cookies.get("pocketledger_csrf", ""),
             "accounts": accounts,
@@ -94,7 +94,7 @@ def upload(
         "imports/mapping.html.j2",
         {
             "user": user,
-            "demo_mode": False,
+            "demo_mode": is_demo(request),
             "allow_registration": False,
             "csrf_token": request.cookies.get("pocketledger_csrf", ""),
             "accounts": [scoped_get(session, user.id, Account, account_id)],
@@ -160,7 +160,7 @@ def dry_run(
         "imports/dry_run.html.j2",
         {
             "user": user,
-            "demo_mode": False,
+            "demo_mode": is_demo(request),
             "allow_registration": False,
             "csrf_token": request.cookies.get("pocketledger_csrf", ""),
             "account_id": account_id,
@@ -222,7 +222,7 @@ def batch_detail(
         "imports/batch.html.j2",
         {
             "user": user,
-            "demo_mode": False,
+            "demo_mode": is_demo(request),
             "allow_registration": False,
             "csrf_token": request.cookies.get("pocketledger_csrf", ""),
             "batch": batch,

@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from ..auth.scoped import scoped_get, scoped_query
 from ..models.account import ACCOUNT_TYPES, Account
 from ..models.transaction import Transaction
-from ..routers.deps import CurrentUser, SessionDep, require_csrf
+from ..routers.deps import CurrentUser, SessionDep, is_demo, require_csrf
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 templates = Jinja2Templates(directory="app/templates")
@@ -33,7 +33,7 @@ def list_accounts(request: Request, user: CurrentUser, session: SessionDep):
         "accounts/list.html.j2",
         {
             "user": user,
-            "demo_mode": request.app.state.settings.demo_mode if hasattr(request.app.state, "settings") else False,
+            "demo_mode": is_demo(request),
             "allow_registration": False,
             "csrf_token": request.cookies.get("pocketledger_csrf", ""),
             "account_types": ACCOUNT_TYPES,

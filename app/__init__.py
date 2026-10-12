@@ -29,6 +29,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     app = FastAPI(title="PocketLedger", version="0.1.0")
+    app.state.settings = settings
 
     app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -58,8 +59,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth_router)
     _include_feature_routers(app)
     _register_demo_middleware(app, settings)
+    _seed_if_requested(settings)
 
     return app
+
+
+def _seed_if_requested(settings: Settings) -> None:
+    """If SEED_ON_START is on, seed the demo user with 6 months of data.
+
+    The seeder is idempotent: if the demo user already has any
+    transaction, the call is a no-op.
+    """
+    if not settings.seed_on_start:
+        return
+    from sqlmodel import Session as _S
+
+    from .db import get_engine
+    from .demo import ensure_demo_user, seed_demo_data
+
+    with _S(get_engine()) as s:
+        u = ensure_demo_user(s)
+        seed_demo_data(s, u)
 
 
 def _include_feature_routers(app: FastAPI) -> None:
