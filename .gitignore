@@ -17,7 +17,7 @@ data/
 .DS_Store
 playwright-report/
 test-results/
-screenshots/
+/screenshots/
 .venv-*/
 .coverage
 htmlcov/
