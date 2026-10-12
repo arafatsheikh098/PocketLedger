@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PocketLedger{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/vendor/htmx.min.js"></script>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  {% if demo_mode %}<div class="banner banner-demo" role="alert">Demo with fake data. Do not enter real data.</div>{% endif %}
+  <header class="topbar">
+    <a class="brand" href="/">PocketLedger</a>
+    <nav>
+      {% if user %}<a href="/transactions">Transactions</a><a href="/accounts">Accounts</a><a href="/categories">Categories</a><a href="/rules">Rules</a><a href="/budgets">Budgets</a><a href="/dashboard">Dashboard</a><a href="/imports">Import</a><a href="/exports">Export</a><a href="/auth/change-password">Password</a><form method="post" action="/auth/logout" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="link">Logout</button></form>{% else %}<a href="/auth/login">Login</a>{% if allow_registration %}<a href="/auth/register">Register</a>{% endif %}{% endif %}
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

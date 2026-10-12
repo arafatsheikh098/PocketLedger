@@ -1,0 +1,20 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-please-change-me-please-change-me-please-change-me-1234567890}
+      DATABASE_URL: sqlite:////data/pocketledger.db
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-false}
+      DEMO_MODE: ${DEMO_MODE:-false}
+      SEED_ON_START: ${SEED_ON_START:-false}
+      USER_TIMEZONE: ${USER_TIMEZONE:-UTC}
+      DEFAULT_CURRENCY: ${DEFAULT_CURRENCY:-USD}
+      APP_ENV: ${APP_ENV:-production}
+    volumes:
+      - pocketledger-data:/data
+    restart: unless-stopped
+
+volumes:
+  pocketledger-data:

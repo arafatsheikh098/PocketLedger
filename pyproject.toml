@@ -1,0 +1,50 @@
+[project]
+name = "pocketledger"
+version = "0.1.0"
+description = "PocketLedger - privacy-first self-hosted expense tracker"
+requires-python = "==3.12.*"
+dependencies = [
+    "fastapi==0.115.6",
+    "uvicorn[standard]==0.34.0",
+    "sqlmodel==0.0.23",
+    "alembic==1.14.0",
+    "pydantic==2.10.4",
+    "pydantic-settings==2.7.0",
+    "jinja2==3.1.5",
+    "python-multipart==0.0.20",
+    "argon2-cffi==23.1.0",
+    "charset-normalizer==3.4.1",
+    "openpyxl==3.1.5",
+    "itsdangerous==2.2.0",
+    "httpx==0.28.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "pytest-playwright==0.7.0",
+    "freezegun==1.5.1",
+    "ruff==0.8.4",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app"]

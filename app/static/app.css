@@ -1,0 +1,32 @@
+:root { color-scheme: light dark; --bg:#fafafa; --fg:#222; --muted:#777; --accent:#2b6cb0; --warn:#c05621; --bad:#9b2c2c; --ok:#276749; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg); color: var(--fg); }
+.topbar { display:flex; align-items:center; gap:1rem; padding:0.75rem 1rem; border-bottom:1px solid #ddd; }
+.topbar .brand { font-weight:700; text-decoration:none; color: var(--fg); }
+.topbar nav a, .topbar nav .link { margin-right:0.5rem; text-decoration:none; color: var(--accent); background:none; border:none; cursor:pointer; font: inherit; }
+.topbar nav form.inline { display:inline; }
+main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+h1, h2, h3 { margin-top: 0; }
+.banner { padding: 0.5rem 1rem; text-align:center; }
+.banner-demo { background: var(--warn); color: white; }
+.banner-over { background: var(--bad); color: white; padding: 0.5rem 1rem; margin: 0.5rem 0; border-radius: 4px; }
+.warn { color: var(--warn); }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #eee; text-align:left; }
+th { background:#f0f0f0; }
+.progress { background:#eee; height: 0.8rem; border-radius: 4px; overflow:hidden; }
+.progress > div { height: 100%; background: var(--accent); }
+.progress.warn > div { background: var(--warn); }
+.progress.over > div { background: var(--bad); }
+button, .btn { background: var(--accent); color:white; border:0; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-block; }
+button.secondary { background: #888; }
+input, select, textarea { padding:0.3rem 0.5rem; border:1px solid #ccc; border-radius:3px; font: inherit; }
+form .row { margin-bottom: 0.5rem; }
+form .row label { display:block; font-weight:600; margin-bottom:0.2rem; }
+.flash { padding: 0.5rem 1rem; border-radius: 4px; margin: 0.5rem 0; }
+.flash.error { background: #fed7d7; color: #742a2a; }
+.flash.ok { background: #c6f6d5; color: #22543d; }
+.muted { color: var(--muted); font-size: 0.9rem; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.amount-expense { color: var(--bad); }
+.amount-income { color: var(--ok); }
