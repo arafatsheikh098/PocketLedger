@@ -32,8 +32,13 @@ def isolated_db(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Generator[No
     importlib.reload(db_module)
     db_module.reset_engine_for_tests()
     db_module.create_db_and_tables()
+    # Force settings to reload in case a prior test mutated env.
+    from app.config import get_settings
+
+    get_settings.cache_clear()
     yield
     db_module.reset_engine_for_tests()
+    get_settings.cache_clear()
 
 
 @pytest.fixture

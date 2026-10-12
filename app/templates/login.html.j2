@@ -1,0 +1,13 @@
+{% extends "base.html.j2" %}
+{% block title %}Login - PocketLedger{% endblock %}
+{% block content %}
+<h1>Log in</h1>
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+<form method="post" action="/auth/login">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <div class="row"><label>Username <input name="username" autofocus required></label></div>
+  <div class="row"><label>Password <input name="password" type="password" required></label></div>
+  <button type="submit">Log in</button>
+</form>
+{% if allow_registration %}<p>No account? <a href="/auth/register">Register</a>.</p>{% endif %}
+{% endblock %}

@@ -5,6 +5,7 @@ baked in; production refuses to start with the default SECRET_KEY.
 """
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -35,6 +36,7 @@ class Settings(BaseSettings):
         return self.app_env.lower() == "production"
 
 
+@lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()
 

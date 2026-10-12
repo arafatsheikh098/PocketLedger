@@ -1,0 +1,12 @@
+{% extends "base.html.j2" %}
+{% block title %}Register - PocketLedger{% endblock %}
+{% block content %}
+<h1>Register</h1>
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+<form method="post" action="/auth/register">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <div class="row"><label>Username <input name="username" required></label></div>
+  <div class="row"><label>Password (min 8 chars) <input name="password" type="password" minlength="8" required></label></div>
+  <button type="submit">Create account</button>
+</form>
+{% endblock %}
