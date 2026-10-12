@@ -1,7 +1,7 @@
 """Export endpoints: CSV and XLSX download."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter
 from fastapi.responses import Response
@@ -12,10 +12,14 @@ from ..services import exports as exports_service
 router = APIRouter(prefix="/exports", tags=["exports"])
 
 
+def _today_str() -> str:
+    return datetime.now(UTC).strftime("%Y%m%d")
+
+
 @router.get("/transactions.csv")
 def export_transactions_csv(user: CurrentUser, session: SessionDep):
     body = exports_service.export_csv(session, user.id)
-    today = datetime.utcnow().strftime("%Y%m%d")
+    today = _today_str()
     return Response(
         content=body,
         media_type="text/csv; charset=utf-8",
@@ -26,7 +30,7 @@ def export_transactions_csv(user: CurrentUser, session: SessionDep):
 @router.get("/transactions.xlsx")
 def export_transactions_xlsx(user: CurrentUser, session: SessionDep):
     body = exports_service.export_xlsx(session, user.id)
-    today = datetime.utcnow().strftime("%Y%m%d")
+    today = _today_str()
     return Response(
         content=body,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

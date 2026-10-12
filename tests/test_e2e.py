@@ -118,11 +118,6 @@ def _login(page, base: str, username: str = "alice", password: str = "pw12345678
     page.wait_for_url(base + "/")
 
 
-def _add_account_id(base: str) -> int:
-    """Find the user's account id via the page."""
-    pass
-
-
 def test_e2e_log_in_and_export_xlsx(page, tmp_path) -> None:
     """End-to-end: log in, visit dashboard, download the XLSX export."""
     _seed()
