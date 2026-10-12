@@ -1,0 +1,74 @@
+{% extends "base.html.j2" %}
+{% block title %}Rules - PocketLedger{% endblock %}
+{% block content %}
+<h1>Categorization rules</h1>
+<p class="muted">
+  Rules auto-assign a category to every transaction whose description
+  contains the pattern (case-insensitive). The first match in this list
+  wins. Rules never overwrite a category you have assigned by hand.
+</p>
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Pattern</th>
+      <th>Category</th>
+      <th>Order</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rules %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td><code>{{ r.pattern }}</code></td>
+        <td>{{ categories_by_id.get(r.category_id, '?') }}</td>
+        <td>
+          <form method="post" action="/rules/{{ r.id }}/up" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="secondary" type="submit" title="Move up">&uarr;</button>
+          </form>
+          <form method="post" action="/rules/{{ r.id }}/down" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="secondary" type="submit" title="Move down">&darr;</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/rules/{{ r.id }}/delete" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="secondary" type="submit"
+                    onclick="return confirm('Delete this rule?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">No rules yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Add rule</h2>
+{% if categories %}
+  <form method="post" action="/rules">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row">
+      <label>Pattern
+        <input name="pattern" maxlength="255" required
+               placeholder="e.g. starbucks, uber, salary">
+      </label>
+    </div>
+    <div class="row">
+      <label>Category
+        <select name="category_id" required>
+          {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+    <button type="submit">Add rule</button>
+  </form>
+{% else %}
+  <p class="muted">Create at least one category before adding rules.</p>
+{% endif %}
+{% endblock %}

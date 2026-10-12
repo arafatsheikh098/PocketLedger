@@ -35,6 +35,11 @@ target-version = "py312"
 select = ["E", "F", "I", "B", "UP", "SIM"]
 ignore = ["E501"]
 
+[tool.ruff.lint.per-file-ignores]
+# FastAPI's File()/Form() are required to be defaults for the framework
+# to detect form fields; the B008 false-positive is unavoidable.
+"app/routers/imports.py" = ["B008"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"

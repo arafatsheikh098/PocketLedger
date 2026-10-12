@@ -1,13 +1,11 @@
 """CSV import wizard routes."""
 from __future__ import annotations
 
-import json
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlmodel import select
 
 from ..auth.scoped import scoped_get, scoped_query
 from ..models.account import Account

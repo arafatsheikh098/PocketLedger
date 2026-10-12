@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.auth.passwords import hash_password
 from app.db import get_engine

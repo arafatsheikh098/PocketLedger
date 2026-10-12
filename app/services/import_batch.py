@@ -7,14 +7,11 @@ deletes exactly the rows a batch added.
 """
 from __future__ import annotations
 
-import io
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Iterable
 
 from sqlmodel import Session, select
 
-from ..models.account import Account
 from ..models.import_batch import ImportBatch
 from ..models.transaction import Transaction
 from . import csv_detect, mapping
@@ -183,7 +180,6 @@ def dry_run(
     by_line: dict[int, tuple[date, int, str, bool, int, str]] = {
         ln: (d, amt, desc, is_transfer, idx, dk) for (ln, d, amt, desc, is_transfer, idx, dk) in extended
     }
-    parsed_by_line = {ln: (d, amt, desc, is_transfer) for (ln, d, amt, desc, is_transfer) in parsed}
 
     for line_no, d, amt, desc, is_transfer in parsed:
         _, _, _, _, _, dk = by_line[line_no]
@@ -280,7 +276,14 @@ def commit(
 
     u = session.get(User, user_id)
     base_currency = u.base_currency if u is not None else "USD"
-    for line_no, d, amt, desc, is_transfer, idx, dk in extended:
+    # Auto-categorize imported rows with the user's rules. The
+    # categories are stored on the Transaction here; rules are
+    # re-evaluated at insert time so newly imported rows are
+    # immediately categorized.
+    from . import rules as rules_service
+
+    user_rules = rules_service.load_user_rules(session, user_id)
+    for _line_no, d, amt, desc, is_transfer, _idx, dk in extended:
         if dk in existing_keys:
             continue
         t = Transaction(
@@ -294,6 +297,12 @@ def commit(
             import_batch_id=batch.id,
             dedup_key=dk,
         )
+        # Try rules first; if a rule matches, the category is set
+        # but manual_category stays False (only the user setting a
+        # category by hand flips that flag).
+        cat_id = rules_service.apply_to_description(desc, user_rules)
+        if cat_id is not None:
+            t.category_id = cat_id
         session.add(t)
         written += 1
     batch.row_count = written

@@ -92,6 +92,8 @@ def list_transactions(
             "total": total,
             "page": page,
             "pages": pages,
+            "info": request.query_params.get("info"),
+            "error": request.query_params.get("error"),
             "filters": {
                 "date_from": date_from,
                 "date_to": date_to,
@@ -266,6 +268,27 @@ def delete_transaction(
     session.delete(txn)
     session.commit()
     return RedirectResponse("/transactions", status_code=303)
+
+
+@router.post("/reapply-rules", response_model=None)
+def reapply_rules(
+    user: CurrentUser,
+    session: SessionDep,
+    _csrf: None = Depends(require_csrf),
+):
+    """Re-run rules on every uncategorized, non-sticky transaction.
+
+    This is what the user clicks after editing a rule's pattern or
+    adding a new rule. Manual category assignments are preserved
+    (sticky), and rows that already have a category are left alone.
+    """
+    from ..services import rules as rules_service
+
+    n = rules_service.reapply_uncategorized(session, user.id)
+    return RedirectResponse(
+        f"/transactions?info=Re-applied+rules+to+{n}+transactions",
+        status_code=303,
+    )
 
 
 def _save_transaction(

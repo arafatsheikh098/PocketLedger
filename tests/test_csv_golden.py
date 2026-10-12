@@ -10,7 +10,6 @@ import json
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
 from app.auth.passwords import hash_password
@@ -96,7 +95,7 @@ def test_fixture_imports_to_expected_rows(name: str) -> None:
             [r for r in result.rows if r.status == "new"],
             key=lambda r: (r.date, r.description),
         ),
-        sorted(expected_new, key=lambda r: (r["date"], r["description"])),
+        sorted(expected_new, key=lambda r: (r["date"], r["description"])), strict=False,
     ):
         assert actual.date.isoformat() == exp["date"]
         assert actual.description == exp["description"]
@@ -122,7 +121,7 @@ def test_fixture_imports_to_expected_rows(name: str) -> None:
     assert len(rows) == len(expected_new)
     for actual, exp in zip(
         sorted(rows, key=lambda r: (r.date, r.description)),
-        sorted(expected_new, key=lambda r: (r["date"], r["description"])),
+        sorted(expected_new, key=lambda r: (r["date"], r["description"])), strict=False,
     ):
         assert actual.date.isoformat() == exp["date"]
         assert actual.description == exp["description"]

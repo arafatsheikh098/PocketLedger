@@ -56,7 +56,7 @@ class Mapping:
         return json.dumps(asdict(self))
 
     @classmethod
-    def from_json(cls, blob: str) -> "Mapping":
+    def from_json(cls, blob: str) -> Mapping:
         return cls(**json.loads(blob))
 
 
