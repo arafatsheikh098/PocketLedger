@@ -7,12 +7,14 @@ browsers are not installed.
 from __future__ import annotations
 
 import datetime
+import os
 import socket
 import threading
 import time
 import urllib.request
 from contextlib import closing
 
+import pytest
 import uvicorn
 from openpyxl import load_workbook
 from sqlmodel import Session, select
@@ -23,6 +25,22 @@ from app.models.budget import Budget
 from app.models.category import Category
 from app.models.user import User
 from app.routers.auth import _seed_default_categories
+
+
+def _has_browser() -> bool:
+    try:
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as p:
+            return bool(p.chromium.executable_path and os.path.exists(p.chromium.executable_path))
+    except Exception:
+        return False
+
+
+pytestmark = pytest.mark.skipif(
+    not _has_browser(),
+    reason="Playwright chromium browser not installed (run 'playwright install chromium')",
+)
 
 
 def _free_port() -> int:
