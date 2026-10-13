@@ -1,5 +1,7 @@
 # PocketLedger
 
+[![CI](https://github.com/arafatsheikh098/PocketLedger/actions/workflows/ci.yml/badge.svg)](https://github.com/arafatsheikh098/PocketLedger/actions/workflows/ci.yml)
+
 Privacy-first, self-hosted expense tracker. Single binary-style
 deployment: Python + SQLite, served by Uvicorn behind a single
 cookie-based session. No third-party network calls.
