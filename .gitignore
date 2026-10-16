@@ -21,3 +21,18 @@ test-results/
 .venv-*/
 .coverage
 htmlcov/
+
+# Security, secrets & audit exclusions
+need_fix.md
+AUDIT_REPORT.md
+CLAUDE.md
+BLOCKERS.md
+DECISIONS.md
+FINAL_REPORT.md
+PLAN.md
+PROJECT_SPEC.md
+*.sqlite
+*.sqlite3
+.env.*
+!.env.example
+Thumbs.db
