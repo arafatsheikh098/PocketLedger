@@ -42,14 +42,12 @@ and `DEMO_MODE=true` in the environment. On first boot the app
 creates a `demo` / `demo1234` user with the fake transactions and
 one budget that is over 80% spent.
 
-## Screenshots
+## 📸 Visual Tour & Screenshots
 
-| Login | Dashboard | Transactions |
-|:---:|:---:|:---:|
-| ![](docs/screenshots/login.png) | ![](docs/screenshots/dashboard.png) | ![](docs/screenshots/transactions.png) |
-
-The login screenshot shows the demo banner that is rendered on
-every page when `DEMO_MODE=true`.
+| 🔐 Demo Authentication & Safe Mode | 📊 Financial Dashboard & Budget Tracking | 💳 Ledger & Categorized Transactions |
+| :---: | :---: | :---: |
+| [![Login](docs/screenshots/login.png)](docs/screenshots/login.png) | [![Dashboard](docs/screenshots/dashboard.png)](docs/screenshots/dashboard.png) | [![Transactions](docs/screenshots/transactions.png)](docs/screenshots/transactions.png) |
+| *One-click demo banner in `DEMO_MODE=true`* | *6-month trends, category breakdowns & budget gauges* | *Searchable transaction log with categorization badges* |
 
 ## Deployment
 
